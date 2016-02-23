@@ -5,16 +5,16 @@ app.config([
 '$urlRouterProvider',
 function($stateProvider, $urlRouterProvider) {
 
-  $stateProvider
-    .state('home', {
-      url: '/home',
-      views: {
-            '': {
-            templateUrl: './templates/home.html',
-            controller: 'MainCtrl'
-            }
-      }
-  });
+	$stateProvider
+		.state('home', {
+			url: '/home',
+			views: {
+				'': {
+					templateUrl: './templates/home.html',
+					controller: 'MainCtrl'
+				}
+			}
+		});
 
 	$stateProvider
 		.state('posts', {
@@ -27,20 +27,21 @@ function($stateProvider, $urlRouterProvider) {
 			}
 		});
 
-  $urlRouterProvider.otherwise('home');
+	$urlRouterProvider.otherwise('home');
 
 }]);
 
-app.factory('posts', ['http', function($http){
+app.factory('posts', ['$http', function($http){
 	
 	var o = {posts: []};
 
 	o.getAll = function() {
-    return $http.get('/posts').success(function(data){
-      angular.copy(data, o.posts);
-    });
-  };
+		return $http.get('/posts').success(function(data){
+			angular.copy(data, o.posts);
+		});
+	};
 	return o;
+
 }]);
 
 app.controller('MainCtrl', ['$scope', 'posts', function($scope, posts) {
@@ -62,7 +63,8 @@ app.controller('MainCtrl', ['$scope', 'posts', function($scope, posts) {
 					{author: 'Bob',
 					body: 'Great idea but everything is wrong!',
 					upvotes: 0}
-  ]});
+					]
+			});
 			$scope.title = "";
 			$scope.link = "";
 		};

@@ -10,67 +10,106 @@ var mongoose = require('mongoose');
 var Post = mongoose.model('Post');
 var Comment = mongoose.model('Comment');
 
+/* GET all posts from DB */
 router.get('/posts', function(req, res, next) {
   Post.find(function(err, posts){
-    if(err){ return next(err); }
-
+    if(err){
+      return next(err);
+    }
     res.json(posts);
   });
 });
 
+/* POST a single post to DB */
 router.post('/posts', function(req, res, next) {
   var post = new Post(req.body);
 
   post.save(function(err, post){
-    if(err){ return next(err); }
-
+    if(err){
+      return next(err);
+    }
     res.json(post);
   });
 });
 
+/* function to get a post by ID */
 router.param('post', function(req, res, next, id) {
   var query = Post.findById(id);
 
   query.exec(function (err, post){
-    if (err) { return next(err); }
-    if (!post) { return next(new Error('can\'t find post')); }
-
+    if (err) {
+      return next(err);
+    }
+    if (!post) {
+      return next(new Error('can\'t find post'));
+    }
     req.post = post;
     return next();
   });
 });
 
-router.get('/posts/:post', function(req, res) {
-  res.json(req.post);
-});
-
-router.put('/posts/:post/upvote', function(req, res, next) {
-  req.post.upvote(function(err, post){
+/* GET a post by ID with their comments */
+router.get('/posts/:post', function(req, res, next) {
+  req.post.populate('comments', function(err, post) {
     if (err) { return next(err); }
 
     res.json(post);
   });
 });
 
+/* PUT Upvote a given post */
+router.put('/posts/:post/upvote', function(req, res, next) {
+  req.post.upvote(function(err, post){
+    if (err) {
+      return next(err);
+    }
+    res.json(post);
+  });
+});
+
+/* POST a comment from a given post */
 router.post('/posts/:post/comments', function(req, res, next) {
   var comment = new Comment(req.body);
   comment.post = req.post;
 
   comment.save(function(err, comment){
-    if(err){ return next(err); }
+    if(err){
+      return next(err);
+    }
 
     req.post.comments.push(comment);
     req.post.save(function(err, post) {
-      if(err){ return next(err); }
+      if(err){
+        return next(err);
+      }
 
       res.json(comment);
     });
   });
 });
 
-router.get('/posts/:post', function(req, res, next) {
-  req.post.populate('comments', function(err, post) {
-    if (err) { return next(err); }
+/* function to get a comment by ID */
+router.param('comment', function(req, res, next, id) {
+  var query = Comment.findById(id);
+
+  query.exec(function (err, comment){
+    if (err) {
+      return next(err);
+    }
+    if (!comment) {
+      return next(new Error('can\'t find comment'));
+    }
+    req.comment = comment;
+    return next();
+  });
+});
+
+/* PUT Upvote a comment from a given post */
+router.put('/posts/:post/comments/:comment/upvote', function(req, res, next) {
+  req.comment.upvote(function(err, post){
+    if (err) {
+      return next(err);
+    }
 
     res.json(post);
   });
